@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIGHT SMP - Minecraft Sunucusu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        :root {
+            --primary-color: #00f2fe;
+            --secondary-color: #4facfe;
+            --bg-dark: #0a0c10;
+            --card-bg: rgba(18, 22, 31, 0.85);
+            --text-color: #ffffff;
+            --text-muted: #a0aec0;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-color);
+            overflow-x: hidden;
+            background: radial-gradient(circle at center, #141a29 0%, #0a0c10 100%);
+            min-height: 100vh;
+        }
+
+        /* NAVBAR */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 8%;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+            background: rgba(10, 12, 16, 0.9);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .logo {
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: #fff;
+            text-transform: uppercase;
+        }
+
+        .logo span {
+            color: var(--primary-color);
+            text-shadow: 0 0 15px rgba(0, 242, 254, 0.6);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 22px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            border: none;
+            outline: none;
+        }
+
+        .btn-login {
+            background: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .btn-login:hover {
+            background: rgba(0, 242, 254, 0.1);
+        }
+
+        .btn-register {
+            background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
+            color: #000;
+        }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 242, 254, 0.4);
+        }
+
+        /* HERO SECTION */
+        .hero {
+            padding: 140px 20px 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 54px;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 16px;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin-bottom: 25px;
+        }
+
+        .cta-btn {
+            padding: 14px 35px;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 30px;
+            background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
+            color: #000;
+            text-decoration: none;
+            box-shadow: 0 0 25px rgba(0, 242, 254, 0.4);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .cta-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* CONTAINER & CARDS */
+        .main-container {
+            max-width: 900px;
+            margin: 0 auto 50px auto;
+            padding: 0 20px;
+            display: grid;
+            gap: 30px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .card h2 {
+            margin-bottom: 20px;
+            font-size: 22px;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* SUNUCU DURUMU */
+        .server-status-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ff4757;
+            box-shadow: 0 0 10px #ff4757;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .status-indicator.online {
+            background: #2ed573;
+            box-shadow: 0 0 10px #2ed573;
+        }
+
+        .ip-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+        }
+
+        .ip-text {
+            font-family: monospace;
+            font-size: 15px;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        /* HABERLER VE SEZON */
+        .season-badge {
+            display: inline-block;
+            background: rgba(0, 242, 254, 0.15);
+            color: var(--primary-color);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 15px;
+            border: 1px solid var(--primary-color);
+        }
+
+        .news-item {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .news-item h3 {
+            font-size: 16px;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+        .news-item p {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .news-date {
+            font-size: 11px;
+            color: var(--primary-color);
+            margin-top: 8px;
+        }
+
+        /* FORMS */
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .input-group input, .input-group select, .input-group textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            outline: none;
+        }
+
+        .input-group input:focus, .input-group select:focus, .input-group textarea:focus {
+            border-color: var(--primary-color);
+        }
+
+        .form-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            color: #000;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .form-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: #12161f;
+            padding: 30px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 380px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px; right: 20px;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        /* ADMIN PANEL ITEMS */
+        .app-item {
+            background: rgba(0,0,0,0.4);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--primary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-approve { background: #2ed573; color: #000; padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .btn-reject { background: #ff4757; color: #fff; padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+
+        /* TOAST */
+        #toast {
+            visibility: hidden;
+            background-color: #222;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 14px;
+            position: fixed;
+            z-index: 2000;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 1px solid var(--primary-color);
+            min-width: 240px;
+        }
+        #toast.show { visibility: visible; animation: fade 2.5s; }
+        @keyframes fade { 0%{opacity:0; bottom:0;} 20%{opacity:1; bottom:30px;} 80%{opacity:1; bottom:30px;} 100%{opacity:0; bottom:0;} }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <header>
+        <div class="logo">light <span>smp</span></div>
+        <div id="authNav" class="nav-buttons">
+            <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
+            <button class="btn btn-register" onclick="openModal('registerModal')">Kayıt Ol</button>
+        </div>
+    </header>
+
+    <!-- HERO -->
+    <section class="hero">
+        <h1><span>LIGHT SMP</span> MACERASI</h1>
+        <p>Krallığını seç, müttefiklerini bul ve bu büyük dünyada yerini al!</p>
+        <button class="cta-btn" onclick="openModal('registerModal')">Hemen Başla</button>
+    </section>
+
+    <!-- ANA İÇERİK -->
+    <div class="main-container">
+        <!-- SUNUCU DURUM KARTI -->
+        <div class="card">
+            <h2><i class="fa-solid fa-server"></i> Sunucu Durumu</h2>
+            <div class="server-status-box">
+                <div>
+                    <div><span class="status-indicator" id="statusDot"></span><span id="statusText">Yükleniyor...</span></div>
+                    <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Aktif Oyuncu: <span id="playerCount">- / -</span></div>
+                </div>
+                <div class="ip-box" onclick="copyIP()">
+                    <span class="ip-text">Lightsmpp.aternos.me</span>
+                    <i class="fa-regular fa-copy" style="color: var(--primary-color);"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEZON VE HABERLER KARTI -->
+        <div class="card">
+            <h2><i class="fa-solid fa-newspaper"></i> Sezon & Sunucu Haberleri</h2>
+            <div class="season-badge" id="seasonDisplay">Aktif Sezon: Sezon 1 - Yeni Başlangıç</div>
+            <div id="newsContainer">
+                <!-- Haberler buraya otomatik yüklenecek -->
+            </div>
+        </div>
+
+        <!-- KRALLIK BAŞVURU KARTI (Sadece Giriş Yapanlar Görür) -->
+        <div class="card" id="kingdomCard" style="display: none;">
+            <h2><i class="fa-solid fa-shield-halved"></i> Krallık Başvuru Formu</h2>
+            <form onsubmit="submitKingdomApp(event)">
+                <div class="input-group">
+                    <label>Katılmak İstediğin Krallık</label>
+                    <select id="kingdomSelect" required>
+                        <option value="">Krallık Seçin...</option>
+                        <option value="Dünya Krallığı">Dünya Krallığı</option>
+                        <option value="Nether Krallığı">Nether Krallığı</option>
+                        <option value="End Krallığı">End Krallığı</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Neden Bu Krallık? (Kısa Açıklama)</label>
+                    <input type="text" id="appReason" required placeholder="Örn: Arkadaşlarım bu krallıkta.">
+                </div>
+                <button type="submit" class="form-btn">Başvuru Gönder</button>
+            </form>
+        </div>
+
+        <!-- YÖNETİCİ PANELİ (proeditYT veya LognKing7470 giriş yapınca görünür) -->
+        <div class="card" id="adminPanel" style="display: none; border-color: var(--primary-color);">
+            <h2><i class="fa-solid fa-crown"></i> Yönetici Paneli</h2>
+            
+            <!-- SEZON VE HABER EKLEME -->
+            <div style="margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px;">
+                <h3 style="font-size: 16px; margin-bottom: 10px;">Sezon Adı Güncelle</h3>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="newSeasonInput" placeholder="Örn: Sezon 2 - Ejderha Çağı" style="flex:1; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color:#fff;">
+                    <button class="btn btn-register" onclick="updateSeason()">Güncelle</button>
+                </div>
+
+                <h3 style="font-size: 16px; margin-top: 20px; margin-bottom: 10px;">Yeni Haber Paylaş</h3>
+                <form onsubmit="addNews(event)">
+                    <div class="input-group">
+                        <input type="text" id="newsTitle" placeholder="Haber Başlığı" required>
+                    </div>
+                    <div class="input-group">
+                        <textarea id="newsContent" placeholder="Haber İçeriği..." rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="form-btn">Haberi Yayınla</button>
+                </form>
+            </div>
+
+            <!-- KRALLIK BAŞVURULARI -->
+            <h3 style="font-size: 16px; margin-bottom: 10px;">Bekleyen Krallık Başvuruları</h3>
+            <div id="appListContainer">
+                <p style="color: var(--text-muted);">Bekleyen başvuru bulunmuyor.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- GİRİŞ YAP MODAL -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('loginModal')">&times;</span>
+            <h2 style="color: #fff; margin-bottom: 20px;">Giriş Yap</h2>
+            <form onsubmit="handleLogin(event)">
+                <div class="input-group">
+                    <label>Oyuncu Adı</label>
+                    <input type="text" id="loginUser" required placeholder="Oyuncu adın">
+                </div>
+                <div class="input-group">
+                    <label>Şifre</label>
+                    <input type="password" id="loginPass" required placeholder="Şifren">
+                </div>
+                <button type="submit" class="form-btn">Giriş Yap</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- KAYIT OL MODAL -->
+    <div class="modal" id="registerModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('registerModal')">&times;</span>
+            <h2 style="color: #fff; margin-bottom: 20px;">Kayıt Ol</h2>
+            <form onsubmit="handleRegister(event)">
+                <div class="input-group">
+                    <label>Oyuncu Adı</label>
+                    <input type="text" id="regUser" required placeholder="Oyuncu adın">
+                </div>
+                <div class="input-group">
+                    <label>Şifre Oluştur</label>
+                    <input type="password" id="regPass" required placeholder="Güvenli bir şifre">
+                </div>
+                <button type="submit" class="form-btn">Kayıt Ol</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast">İşlem Başarılı!</div>
+
+    <script>
+        const serverIP = "Lightsmpp.aternos.me";
+        // Güncellenmiş Yetkili Yönetici Hesapları
+        const admins = ["proeditYT", "LognKing7470"];
+
+        window.onload = function() {
+            checkAuth();
+            fetchServerStatus();
+            loadNewsAndSeason();
+            setInterval(fetchServerStatus, 30000);
+        }
+
+        // Sunucu Durumunu Çekme
+        async function fetchServerStatus() {
+            try {
+                const res = await fetch(`https://api.mcsrvstat.us/2/${serverIP}`);
+                const data = await res.json();
+                const dot = document.getElementById('statusDot');
+                const txt = document.getElementById('statusText');
+                const count = document.getElementById('playerCount');
+
+                if (data.online) {
+                    dot.classList.add('online');
+                    txt.innerText = "AÇIK";
+                    txt.style.color = "#2ed573";
+                    count.innerText = `${data.players.online} / ${data.players.max}`;
+                } else {
+                    dot.classList.remove('online');
+                    txt.innerText = "KAPALI / UYKUDA";
+                    txt.style.color = "#ff4757";
+                    count.innerText = "0 / 0";
+                }
+            } catch (e) {
+                document.getElementById('statusText').innerText = "BİLİNMİYOR";
+            }
+        }
+
+        // Kayıt Olma
+        function handleRegister(e) {
+            e.preventDefault();
+            const user = document.getElementById('regUser').value.trim();
+            const pass = document.getElementById('regPass').value;
+
+            let users = JSON.parse(localStorage.getItem('smp_users') || '{}');
+            if (users[user]) {
+                showToast("Bu oyuncu adı zaten kayıtlı!");
+                return;
+            }
+
+            users[user] = pass;
+            localStorage.setItem('smp_users', JSON.stringify(users));
+            showToast("Kayıt başarılı! Şimdi giriş yapabilirsin.");
+            closeModal('registerModal');
+            openModal('loginModal');
+        }
+
+        // Giriş Yapma
+        function handleLogin(e) {
+            e.preventDefault();
+            const user = document.getElementById('loginUser').value.trim();
+            const pass = document.getElementById('loginPass').value;
+
+            let users = JSON.parse(localStorage.getItem('smp_users') || '{}');
+            
+            if (admins.includes(user) || users[user] === pass) {
+                localStorage.setItem('smp_current_user', user);
+                showToast(`Hoş geldin, ${user}!`);
+                closeModal('loginModal');
+                checkAuth();
+            } else {
+                showToast("Hatalı kullanıcı adı veya şifre!");
+            }
+        }
+
+        // Oturum Kontrolü
+        function checkAuth() {
+            const currentUser = localStorage.getItem('smp_current_user');
+            const authNav = document.getElementById('authNav');
+            const kingdomCard = document.getElementById('kingdomCard');
+            const adminPanel = document.getElementById('adminPanel');
+
+            if (currentUser) {
+                authNav.innerHTML = `
+                    <span style="font-weight:600; color:var(--primary-color);">${currentUser}</span>
+                    <button class="btn btn-login" onclick="logout()">Çıkış</button>
+                `;
+                kingdomCard.style.display = 'block';
+
+                if (admins.includes(currentUser)) {
+                    adminPanel.style.display = 'block';
+                    loadAdminApplications();
+                } else {
+                    adminPanel.style.display = 'none';
+                }
+            } else {
+                authNav.innerHTML = `
+                    <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
+                    <button class="btn btn-register" onclick="openModal('registerModal')">Kayıt Ol</button>
+                `;
+                kingdomCard.style.display = 'none';
+                adminPanel.style.display = 'none';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('smp_current_user');
+            showToast("Çıkış yapıldı.");
+            checkAuth();
+        }
+
+        // Krallık Başvurusu
+        function submitKingdomApp(e) {
+            e.preventDefault();
+            const currentUser = localStorage.getItem('smp_current_user');
+            const kingdom = document.getElementById('kingdomSelect').value;
+            const reason = document.getElementById('appReason').value;
+
+            let apps = JSON.parse(localStorage.getItem('smp_apps') || '[]');
+            apps.push({ id: Date.now(), user: currentUser, kingdom, reason, status: 'Bekliyor' });
+            localStorage.setItem('smp_apps', JSON.stringify(apps));
+
+            showToast("Krallık başvurusu gönderildi!");
+            document.getElementById('appReason').value = '';
+        }
+
+        // Haberler & Sezon Yükleme
+        function loadNewsAndSeason() {
+            const season = localStorage.getItem('smp_season') || "Aktif Sezon: Sezon 1 - Yeni Başlangıç";
+            document.getElementById('seasonDisplay').innerText = season;
+
+            const news = JSON.parse(localStorage.getItem('smp_news') || '[]');
+            const container = document.getElementById('newsContainer');
+
+            if (news.length === 0) {
+                container.innerHTML = `<p style="color:var(--text-muted); font-size:14px;">Henüz duyuru yapılmadı.</p>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            news.reverse().forEach(n => {
+                container.innerHTML += `
+                    <div class="news-item">
+                        <h3>${n.title}</h3>
+                        <p>${n.content}</p>
+                        <div class="news-date"><i class="fa-regular fa-clock"></i> ${n.date} - Ekleyen: ${n.author}</div>
+                    </div>
+                `;
+            });
+        }
+
+        // Admin: Sezon Güncelleme
+        function updateSeason() {
+            const val = document.getElementById('newSeasonInput').value.trim();
+            if (!val) return;
+            localStorage.setItem('smp_season', "Aktif Sezon: " + val);
+            loadNewsAndSeason();
+            showToast("Sezon adı güncellendi!");
+            document.getElementById('newSeasonInput').value = '';
+        }
+
+        // Admin: Haber Ekleme
+        function addNews(e) {
+            e.preventDefault();
+            const title = document.getElementById('newsTitle').value.trim();
+            const content = document.getElementById('newsContent').value.trim();
+            const author = localStorage.getItem('smp_current_user');
+
+            let news = JSON.parse(localStorage.getItem('smp_news') || '[]');
+            news.push({ title, content, author, date: new Date().toLocaleDateString() });
+            localStorage.setItem('smp_news', JSON.stringify(news));
+
+            loadNewsAndSeason();
+            showToast("Haber yayınlandı!");
+            document.getElementById('newsTitle').value = '';
+            document.getElementById('newsContent').value = '';
+        }
+
+        // Admin: Başvuruları Listeleme
+        function loadAdminApplications() {
+            const container = document.getElementById('appListContainer');
+            let apps = JSON.parse(localStorage.getItem('smp_apps') || '[]').filter(a => a.status === 'Bekliyor');
+
+            if (apps.length === 0) {
+                container.innerHTML = `<p style="color: var(--text-muted);">Bekleyen başvuru bulunmuyor.</p>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            apps.forEach(app => {
+                container.innerHTML += `
+                    <div class="app-item">
+                        <div>
+                            <strong>${app.user}</strong> -> <span style="color:var(--primary-color);">${app.kingdom}</span>
+                            <div style="font-size: 12px; color:var(--text-muted);">Sebep: ${app.reason}</div>
+                        </div>
+                        <div class="admin-actions">
+                            <button class="btn-approve" onclick="updateApp(${app.id}, 'Onaylandı')">Kabul Et</button>
+                            <button class="btn-reject" onclick="updateApp(${app.id}, 'Reddedildi')">Reddet</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function updateApp(id, status) {
+            let apps = JSON.parse(localStorage.getItem('smp_apps') || '[]');
+            apps = apps.map(a => a.id === id ? { ...a, status } : a);
+            localStorage.setItem('smp_apps', JSON.stringify(apps));
+            loadAdminApplications();
+            showToast(`Başvuru ${status.toLowerCase()}!`);
+        }
+
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        function copyIP() { navigator.clipboard.writeText(serverIP); showToast("IP Kopyalandı!"); }
+        function showToast(msg) {
+            const t = document.getElementById("toast");
+            t.innerText = msg;
+            t.className = "show";
+            setTimeout(() => { t.className = ""; }, 2500);
+        }
+    </script>
+</body>
+</html>
