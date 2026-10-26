@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIGHT SMP - Minecraft Sunucusu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <header>
+        <div class="logo">light <span>smp</span></div>
+        <div id="authNav" class="nav-buttons">
+            <button class="btn btn-login" onclick="openModal('loginModal')">Giriş Yap</button>
+            <button class="btn btn-register" onclick="openModal('registerModal')">Kayıt Ol</button>
+        </div>
+    </header>
+
+    <!-- HERO -->
+    <section class="hero">
+        <h1><span>LIGHT SMP</span> MACERASI</h1>
+        <p>Krallığını seç, müttefiklerini bul ve bu büyük dünyada yerini al!</p>
+        <button class="cta-btn" onclick="openModal('registerModal')">Hemen Başla</button>
+    </section>
+
+    <!-- ANA İÇERİK -->
+    <div class="main-container">
+        <!-- SUNUCU DURUM KARTI -->
+        <div class="card">
+            <h2><i class="fa-solid fa-server"></i> Sunucu Durumu</h2>
+            <div class="server-status-box">
+                <div>
+                    <div><span class="status-indicator" id="statusDot"></span><span id="statusText">Yükleniyor...</span></div>
+                    <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Aktif Oyuncu: <span id="playerCount">- / -</span></div>
+                </div>
+                <div class="ip-box" onclick="copyIP()">
+                    <span class="ip-text">Lightsmpp.aternos.me</span>
+                    <i class="fa-regular fa-copy" style="color: var(--primary-color);"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEZON VE HABERler -->
+        <div class="card">
+            <h2><i class="fa-solid fa-newspaper"></i> Sezon & Sunucu Haberleri</h2>
+            <div class="season-badge" id="seasonDisplay">Aktif Sezon: Sezon 1 - Yeni Başlangıç</div>
+            <div id="newsContainer"></div>
+        </div>
+
+        <!-- KRALLIK BAŞVURU KARTI -->
+        <div class="card" id="kingdomCard" style="display: none;">
+            <h2><i class="fa-solid fa-shield-halved"></i> Krallık Başvuru Formu</h2>
+            <form onsubmit="submitKingdomApp(event)">
+                <div class="input-group">
+                    <label>Katılmak İstediğin Krallık</label>
+                    <select id="kingdomSelect" required>
+                        <option value="">Krallık Seçin...</option>
+                        <option value="Dünya Krallığı">Dünya Krallığı</option>
+                        <option value="Nether Krallığı">Nether Krallığı</option>
+                        <option value="End Krallığı">End Krallığı</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Neden Bu Krallık?</label>
+                    <input type="text" id="appReason" required placeholder="Örn: Arkadaşlarım bu krallıkta.">
+                </div>
+                <button type="submit" class="form-btn">Başvuru Gönder</button>
+            </form>
+        </div>
+
+        <!-- YÖNETİCİ PANELİ -->
+        <div class="card" id="adminPanel" style="display: none; border-color: var(--primary-color);">
+            <h2><i class="fa-solid fa-crown"></i> Yönetici Paneli</h2>
+            <div style="margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px;">
+                <h3 style="font-size: 16px; margin-bottom: 10px;">Sezon Adı Güncelle</h3>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="newSeasonInput" placeholder="Örn: Sezon 2 - Ejderha Çağı" style="flex:1; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color:#fff;">
+                    <button class="btn btn-register" onclick="updateSeason()">Güncelle</button>
+                </div>
+
+                <h3 style="font-size: 16px; margin-top: 20px; margin-bottom: 10px;">Yeni Haber Paylaş</h3>
+                <form onsubmit="addNews(event)">
+                    <div class="input-group"><input type="text" id="newsTitle" placeholder="Haber Başlığı" required></div>
+                    <div class="input-group"><textarea id="newsContent" placeholder="Haber İçeriği..." rows="3" required></textarea></div>
+                    <button type="submit" class="form-btn">Haberi Yayınla</button>
+                </form>
+            </div>
+
+            <h3 style="font-size: 16px; margin-bottom: 10px;">Bekleyen Krallık Başvuruları</h3>
+            <div id="appListContainer"><p style="color: var(--text-muted);">Bekleyen başvuru bulunmuyor.</p></div>
+        </div>
+    </div>
+
+    <!-- MODALLAR -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('loginModal')">&times;</span>
+            <h2 style="color: #fff; margin-bottom: 20px;">Giriş Yap</h2>
+            <form onsubmit="handleLogin(event)">
+                <div class="input-group"><label>Oyuncu Adı</label><input type="text" id="loginUser" required placeholder="Oyuncu adın"></div>
+                <div class="input-group"><label>Şifre</label><input type="password" id="loginPass" required placeholder="Şifren"></div>
+                <button type="submit" class="form-btn">Giriş Yap</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="registerModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('registerModal')">&times;</span>
+            <h2 style="color: #fff; margin-bottom: 20px;">Kayıt Ol</h2>
+            <form onsubmit="handleRegister(event)">
+                <div class="input-group"><label>Oyuncu Adı</label><input type="text" id="regUser" required placeholder="Oyuncu adın"></div>
+                <div class="input-group"><label>Şifre Oluştur</label><input type="password" id="regPass" required placeholder="Güvenli şifre"></div>
+                <button type="submit" class="form-btn">Kayıt Ol</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast">İşlem Başarılı!</div>
+    <script src="script.js"></script>
+</body>
+</html>
