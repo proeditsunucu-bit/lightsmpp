@@ -1,11 +1,77 @@
 const serverIP = "Lightsmpp.aternos.me";
 const admins = ["proeditYT", "LognKing7470"];
+// Canlı ortak veritabanı adresi
+const DB_URL = "https://api.npoint.io/468c85ae6cf4177d0793";
 
-window.onload = function() {
+let dbData = {
+    season: "Aktif Sezon: Sezon 1 - Yeni Başlangıç",
+    news: [],
+    apps: [],
+    users: {}
+};
+
+window.onload = async function() {
+    await loadDatabase();
     checkAuth();
     fetchServerStatus();
-    loadNewsAndSeason();
     setInterval(fetchServerStatus, 30000);
+}
+
+// Buluttan Veri Çekme
+async function loadDatabase() {
+    try {
+        const res = await fetch(DB_URL);
+        const data = await res.json();
+        if (data) {
+            dbData = { ...dbData, ...data };
+        }
+    } catch (e) {
+        console.log("Veri çekme hatası:", e);
+    }
+    renderUI();
+}
+
+// Buluta Veri Gönderme
+async function saveDatabase() {
+    try {
+        await fetch(DB_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dbData)
+        });
+    } catch (e) {
+        console.log("Veri kaydetme hatası:", e);
+    }
+}
+
+function renderUI() {
+    // Sezon ve Haberler
+    const seasonEl = document.getElementById('seasonDisplay');
+    if (seasonEl) seasonEl.innerText = dbData.season;
+
+    const container = document.getElementById('newsContainer');
+    if (container) {
+        if (!dbData.news || dbData.news.length === 0) {
+            container.innerHTML = `<p style="color:var(--text-muted); font-size:14px;">Henüz duyuru yapılmadı.</p>`;
+        } else {
+            container.innerHTML = '';
+            [...dbData.news].reverse().forEach(n => {
+                container.innerHTML += `
+                    <div class="news-item">
+                        <h3>${n.title}</h3>
+                        <p>${n.content}</p>
+                        <div class="news-date"><i class="fa-regular fa-clock"></i> ${n.date} - Ekleyen: ${n.author}</div>
+                    </div>
+                `;
+            });
+        }
+    }
+
+    // Admin Başvuruları
+    const currentUser = localStorage.getItem('smp_current_user');
+    if (currentUser && admins.includes(currentUser)) {
+        loadAdminApplications();
+    }
 }
 
 async function fetchServerStatus() {
@@ -32,19 +98,18 @@ async function fetchServerStatus() {
     }
 }
 
-function handleRegister(e) {
+async function handleRegister(e) {
     e.preventDefault();
     const user = document.getElementById('regUser').value.trim();
     const pass = document.getElementById('regPass').value;
 
-    let users = JSON.parse(localStorage.getItem('smp_users') || '{}');
-    if (users[user]) {
+    if (dbData.users[user]) {
         showToast("Bu oyuncu adı zaten kayıtlı!");
         return;
     }
 
-    users[user] = pass;
-    localStorage.setItem('smp_users', JSON.stringify(users));
+    dbData.users[user] = pass;
+    await saveDatabase();
     showToast("Kayıt başarılı! Giriş yapabilirsin.");
     closeModal('registerModal');
     openModal('loginModal');
@@ -55,14 +120,12 @@ function handleLogin(e) {
     const user = document.getElementById('loginUser').value.trim();
     const pass = document.getElementById('loginPass').value;
 
-    let users = JSON.parse(localStorage.getItem('smp_users') || '{}');
-    
-    if (admins.includes(user) || users[user] === pass) {
+    if (admins.includes(user) || dbData.users[user] === pass) {
         localStorage.setItem('smp_current_user', user);
         showToast(`Hoş geldin, ${user}!`);
         closeModal('loginModal');
         checkAuth();
-        loadNewsAndSeason();
+        renderUI();
     } else {
         showToast("Hatalı kullanıcı adı veya şifre!");
     }
@@ -101,78 +164,46 @@ function logout() {
     localStorage.removeItem('smp_current_user');
     showToast("Çıkış yapıldı.");
     checkAuth();
-    loadNewsAndSeason();
 }
 
-function submitKingdomApp(e) {
+async function submitKingdomApp(e) {
     e.preventDefault();
     const currentUser = localStorage.getItem('smp_current_user');
-    if (!currentUser) {
-        showToast("Önce giriş yapmalısın!");
-        return;
-    }
+    if (!currentUser) return showToast("Önce giriş yapmalısın!");
+
     const kingdom = document.getElementById('kingdomSelect').value;
     const reason = document.getElementById('appReason').value;
 
-    let apps = JSON.parse(localStorage.getItem('smp_apps') || '[]');
-    apps.push({ id: Date.now(), user: currentUser, kingdom, reason, status: 'Bekliyor' });
-    localStorage.setItem('smp_apps', JSON.stringify(apps));
-
+    if (!dbData.apps) dbData.apps = [];
+    dbData.apps.push({ id: Date.now(), user: currentUser, kingdom, reason, status: 'Bekliyor' });
+    
+    await saveDatabase();
     showToast("Krallık başvurusu gönderildi!");
     document.getElementById('appReason').value = '';
-    
-    // Eğer yönetici ekrandaysa listeyi hemen güncelle
-    if (admins.includes(currentUser)) {
-        loadAdminApplications();
-    }
+    renderUI();
 }
 
-function loadNewsAndSeason() {
-    const season = localStorage.getItem('smp_season') || "Aktif Sezon: Sezon 1 - Yeni Başlangıç";
-    const seasonEl = document.getElementById('seasonDisplay');
-    if (seasonEl) seasonEl.innerText = season;
-
-    const news = JSON.parse(localStorage.getItem('smp_news') || '[]');
-    const container = document.getElementById('newsContainer');
-    if (!container) return;
-
-    if (news.length === 0) {
-        container.innerHTML = `<p style="color:var(--text-muted); font-size:14px;">Henüz duyuru yapılmadı.</p>`;
-        return;
-    }
-
-    container.innerHTML = '';
-    [...news].reverse().forEach(n => {
-        container.innerHTML += `
-            <div class="news-item">
-                <h3>${n.title}</h3>
-                <p>${n.content}</p>
-                <div class="news-date"><i class="fa-regular fa-clock"></i> ${n.date} - Ekleyen: ${n.author}</div>
-            </div>
-        `;
-    });
-}
-
-function updateSeason() {
+async function updateSeason() {
     const val = document.getElementById('newSeasonInput').value.trim();
     if (!val) return;
-    localStorage.setItem('smp_season', "Aktif Sezon: " + val);
-    loadNewsAndSeason();
+    dbData.season = "Aktif Sezon: " + val;
+    await saveDatabase();
+    renderUI();
     showToast("Sezon adı güncellendi!");
     document.getElementById('newSeasonInput').value = '';
 }
 
-function addNews(e) {
+async function addNews(e) {
     e.preventDefault();
     const title = document.getElementById('newsTitle').value.trim();
     const content = document.getElementById('newsContent').value.trim();
     const author = localStorage.getItem('smp_current_user');
 
-    let news = JSON.parse(localStorage.getItem('smp_news') || '[]');
-    news.push({ title, content, author, date: new Date().toLocaleDateString() });
-    localStorage.setItem('smp_news', JSON.stringify(news));
+    if (!dbData.news) dbData.news = [];
+    dbData.news.push({ title, content, author, date: new Date().toLocaleDateString() });
 
-    loadNewsAndSeason();
+    await saveDatabase();
+    renderUI();
     showToast("Haber yayınlandı!");
     document.getElementById('newsTitle').value = '';
     document.getElementById('newsContent').value = '';
@@ -182,7 +213,7 @@ function loadAdminApplications() {
     const container = document.getElementById('appListContainer');
     if (!container) return;
     
-    let apps = JSON.parse(localStorage.getItem('smp_apps') || '[]').filter(a => a.status === 'Bekliyor');
+    let apps = (dbData.apps || []).filter(a => a.status === 'Bekliyor');
 
     if (apps.length === 0) {
         container.innerHTML = `<p style="color: var(--text-muted);">Bekleyen başvuru bulunmuyor.</p>`;
@@ -206,11 +237,10 @@ function loadAdminApplications() {
     });
 }
 
-function updateApp(id, status) {
-    let apps = JSON.parse(localStorage.getItem('smp_apps') || '[]');
-    apps = apps.map(a => a.id === id ? { ...a, status } : a);
-    localStorage.setItem('smp_apps', JSON.stringify(apps));
-    loadAdminApplications();
+async function updateApp(id, status) {
+    dbData.apps = dbData.apps.map(a => a.id === id ? { ...a, status } : a);
+    await saveDatabase();
+    renderUI();
     showToast(`Başvuru ${status.toLowerCase()}!`);
 }
 
