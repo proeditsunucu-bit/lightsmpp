@@ -62,6 +62,7 @@ function handleLogin(e) {
         showToast(`Hoş geldin, ${user}!`);
         closeModal('loginModal');
         checkAuth();
+        loadNewsAndSeason();
     } else {
         showToast("Hatalı kullanıcı adı veya şifre!");
     }
@@ -100,11 +101,16 @@ function logout() {
     localStorage.removeItem('smp_current_user');
     showToast("Çıkış yapıldı.");
     checkAuth();
+    loadNewsAndSeason();
 }
 
 function submitKingdomApp(e) {
     e.preventDefault();
     const currentUser = localStorage.getItem('smp_current_user');
+    if (!currentUser) {
+        showToast("Önce giriş yapmalısın!");
+        return;
+    }
     const kingdom = document.getElementById('kingdomSelect').value;
     const reason = document.getElementById('appReason').value;
 
@@ -114,14 +120,21 @@ function submitKingdomApp(e) {
 
     showToast("Krallık başvurusu gönderildi!");
     document.getElementById('appReason').value = '';
+    
+    // Eğer yönetici ekrandaysa listeyi hemen güncelle
+    if (admins.includes(currentUser)) {
+        loadAdminApplications();
+    }
 }
 
 function loadNewsAndSeason() {
     const season = localStorage.getItem('smp_season') || "Aktif Sezon: Sezon 1 - Yeni Başlangıç";
-    document.getElementById('seasonDisplay').innerText = season;
+    const seasonEl = document.getElementById('seasonDisplay');
+    if (seasonEl) seasonEl.innerText = season;
 
     const news = JSON.parse(localStorage.getItem('smp_news') || '[]');
     const container = document.getElementById('newsContainer');
+    if (!container) return;
 
     if (news.length === 0) {
         container.innerHTML = `<p style="color:var(--text-muted); font-size:14px;">Henüz duyuru yapılmadı.</p>`;
@@ -129,7 +142,7 @@ function loadNewsAndSeason() {
     }
 
     container.innerHTML = '';
-    news.reverse().forEach(n => {
+    [...news].reverse().forEach(n => {
         container.innerHTML += `
             <div class="news-item">
                 <h3>${n.title}</h3>
@@ -167,6 +180,8 @@ function addNews(e) {
 
 function loadAdminApplications() {
     const container = document.getElementById('appListContainer');
+    if (!container) return;
+    
     let apps = JSON.parse(localStorage.getItem('smp_apps') || '[]').filter(a => a.status === 'Bekliyor');
 
     if (apps.length === 0) {
@@ -204,6 +219,7 @@ function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 function copyIP() { navigator.clipboard.writeText(serverIP); showToast("IP Kopyalandı!"); }
 function showToast(msg) {
     const t = document.getElementById("toast");
+    if (!t) return;
     t.innerText = msg;
     t.className = "show";
     setTimeout(() => { t.className = ""; }, 2500);
